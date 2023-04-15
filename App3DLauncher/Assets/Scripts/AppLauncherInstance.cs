@@ -11,6 +11,7 @@ namespace Tamasssss
         public Vector3 position2;
         public Quaternion rotation;
         public List<GameObject> apps;
+
         void Start()
         {
             var center = (position1 + position2) / 2;
