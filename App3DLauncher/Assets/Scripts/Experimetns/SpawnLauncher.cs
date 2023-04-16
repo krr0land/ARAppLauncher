@@ -34,6 +34,10 @@ public class SpawnLauncher : MonoBehaviour
     int moveCounter = 0;
     int spawnCounter = 0;
 
+    public GameObject Launcher { get { return launcher; } }
+
+    public bool appSelected = false;
+
 
     void Start()
     {
@@ -70,7 +74,7 @@ public class SpawnLauncher : MonoBehaviour
         if (leftHand.IsTracked && rightHand.IsTracked)
         {
             bool isLeftIndexFingerPinching = leftHand.GetFingerIsPinching(OVRHand.HandFinger.Index);
-            bool isRightIndexFingerPinching = leftHand.GetFingerIsPinching(OVRHand.HandFinger.Index);
+            bool isRightIndexFingerPinching = rightHand.GetFingerIsPinching(OVRHand.HandFinger.Index);
 
             if (isLeftIndexFingerPinching && isRightIndexFingerPinching)
             {
@@ -107,7 +111,7 @@ public class SpawnLauncher : MonoBehaviour
         }
     }
 
-    void Toggle()
+    public void Toggle()
     {
         launcher.SetActive(!launcher.activeSelf);
 
