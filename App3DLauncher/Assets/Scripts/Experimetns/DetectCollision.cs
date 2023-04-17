@@ -37,8 +37,8 @@ public class DetectCollision : MonoBehaviour
         if (spawnLauncher.appSelected)
             return;
 
-        string name = col.name.Substring(0, 4);
-        if (name == "Hand" || col.name == "OVRHandRight" || col.name == "OVRHandLeft")
+        string name = col.name.Substring(0, 5);
+        if (name == "Hand_") // possible values are in the OVRSkeleton.BoneId enum
         {
             matRenderer.material.color = Color.red;
             counter = 50;
