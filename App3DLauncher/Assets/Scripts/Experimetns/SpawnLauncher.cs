@@ -14,8 +14,6 @@ public class SpawnLauncher : MonoBehaviour
     public GameObject launcherPrefab;
     public GameObject appPrefab;
 
-    public int appCount = 50;
-
     GameObject launcher;
     List<GameObject> apps;
     LauncherState state = LauncherState.Frontal;
@@ -30,14 +28,17 @@ public class SpawnLauncher : MonoBehaviour
     readonly Vector3 centralPos = new Vector3(0f, 0f, 0f);
     readonly Vector3 centralScale = new Vector3(1.2f, 1.2f, 1.2f);
 
+    readonly Color emissionColor = new Color(0.5f, 0.5f, 0.5f);
+
     bool moving = true;
     int moveCounter = 0;
     int spawnCounter = 0;
 
+    int selectCounter = 0;
+    GameObject selectedObject = null;
+
     public GameObject Launcher { get { return launcher; } }
-
-    public bool appSelected = false;
-
+    public bool AppSelected { get { return selectedObject != null; } }
 
     void Start()
     {
@@ -48,9 +49,25 @@ public class SpawnLauncher : MonoBehaviour
         SetState(LauncherState.Frontal);
 
         apps = new List<GameObject>();
-        for (int i = 0; i < appCount; i++)
-            apps.Add(Instantiate(appPrefab, transform.position, Quaternion.identity, launcher.transform));
+        foreach (AppInfo info in AppCatalog.catalog)
+        {
+            GameObject app = Instantiate(appPrefab, transform.position, Quaternion.identity, launcher.transform);
+            app.name = info.name;
+            Renderer renderer = app.GetComponent<Renderer>();
+
+            renderer.material = new Material(Shader.Find("Standard"));
+            renderer.material.mainTexture = Resources.Load(info.path, typeof(Texture)) as Texture;
+            renderer.material.color = Color.white;
+
+            renderer.material.EnableKeyword("_EMISSION");
+            renderer.material.SetColor("_EmissionColor", emissionColor);
+            renderer.material.DisableKeyword("_EMISSION");
+
+            apps.Add(app);
+        }
+            
         launcher.GetComponent<SphereArranger>().Arange(apps, appScale);
+        selectCounter = -1;
     }
 
     private void FixedUpdate()
@@ -59,8 +76,9 @@ public class SpawnLauncher : MonoBehaviour
             --spawnCounter;
         if (moveCounter > 0)
             --moveCounter;
+        if (selectCounter > 0)
+            --selectCounter;
     }
-
 
     void Update()
     {
@@ -69,6 +87,14 @@ public class SpawnLauncher : MonoBehaviour
             moving = (Vector3.Distance(prevCamPos, centerCamera.transform.position) > 0.1f); // 10 cm
             prevCamPos = centerCamera.transform.position;
             moveCounter = 50; // 1 sec
+        }
+
+        if (selectCounter == 0)
+        {
+            selectCounter = -1;
+            launcher.SetActive(false);
+            selectedObject.GetComponent<Renderer>().material.DisableKeyword("_EMISSION");
+            selectedObject = null;
         }
 
         if (leftHand.IsTracked && rightHand.IsTracked)
@@ -122,6 +148,17 @@ public class SpawnLauncher : MonoBehaviour
             frontalPos.y = frontalHeight;
             frontalPos.z = direction.z;
         }
+    }
+
+    public void SelectApp(GameObject obj)
+    {
+        if (selectedObject != null)
+            return;
+
+        selectedObject = obj;
+        selectedObject.GetComponent<Renderer>().material.EnableKeyword("_EMISSION");
+        selectCounter = 50;
+        Debug.Log("Selected: " + obj.name);
     }
 
     private void OnDestroy()
