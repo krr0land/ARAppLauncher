@@ -18,6 +18,7 @@ public class DetectCollision : MonoBehaviour
         if (name == "Hand_") // possible values are in the OVRSkeleton.BoneId enum
         {
             spawnLauncher.SelectApp(transform.gameObject);
+            transform.GetChild(0).GetComponent<OutlineController>().CloseOutline();
         }
     }
 }
