@@ -7,7 +7,9 @@ public class InstructionScript : MonoBehaviour
 {
     [SerializeField]
     GameObject launcher;
-    int task = 0;
+
+    [SerializeField]
+    int task;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,19 +19,31 @@ public class InstructionScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (task == 1)
+        switch (task)
         {
-            if (launcher.activeSelf)
-            {
-                GetComponent<TextMeshPro>().text = "Select an app";
-                if (launcher.GetComponent<SpawnLauncher>().AppSelected)
-                {
-                    task = 0;
-                    GetComponent<TextMeshPro>().text = "Nicely done!";
-                }
-            }
-            else
-                GetComponent<TextMeshPro>().text = "Open the launcher by pinching on both hands";
+            case 0:
+                Case0();
+                break;
+            case -1:
+                GetComponent<TextMeshPro>().text = "Nicely done!";
+                break;
+            default:
+                GetComponent<TextMeshPro>().text = "Task does not exist or is not selected";
+                break;
         }
+    }
+
+    void Case0()
+    {
+        if (launcher.activeSelf)
+        {
+            GetComponent<TextMeshPro>().text = "Select an app";
+            if (launcher.GetComponent<SpawnLauncher>().AppSelected)
+            {
+                task = -1;
+            }
+        }
+        else
+            GetComponent<TextMeshPro>().text = "Open the launcher by pinching on both hands";
     }
 }
