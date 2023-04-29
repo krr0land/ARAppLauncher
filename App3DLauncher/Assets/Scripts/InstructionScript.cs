@@ -30,7 +30,7 @@ public class InstructionScript : MonoBehaviour
     {
         new Task
         {
-            appName = "Youtube", interaction = Task.InteractionType.Poke, movement = Task.MovementType.Still
+            appName = "YouTube", interaction = Task.InteractionType.Poke, movement = Task.MovementType.Still
         },
         new Task
         {
@@ -157,7 +157,7 @@ public class InstructionScript : MonoBehaviour
 
     public void OnAppSelected(string objName)
     {
-        if (String.Equals(objName, task.appName, StringComparison.CurrentCultureIgnoreCase))
+        if (String.Equals(objName, task.appName, StringComparison.OrdinalIgnoreCase))
         {
             NextTask();
         }
