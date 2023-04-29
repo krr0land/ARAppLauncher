@@ -11,6 +11,8 @@ public class SpawnLauncher : MonoBehaviour
 
     public OVRHand leftHand;
     public OVRHand rightHand;
+    public OVRSkeleton rightSkeleton;
+    public OVRSkeleton leftSkeleton;
 
     public GameObject launcherPrefab;
     public GameObject appPrefab;
@@ -129,12 +131,14 @@ public class SpawnLauncher : MonoBehaviour
         {
             launcher.transform.localPosition = frontalPos;
             launcher.transform.localScale = frontalScale;
+            //launcher.transform.LookAt(centerCamera.transform);
             state = LauncherState.Frontal;
         }
         else if (newState == LauncherState.Central)
         {
             launcher.transform.localPosition = centralPos;
             launcher.transform.localScale = centralScale;
+            launcher.transform.rotation = Quaternion.identity;
             state = LauncherState.Central;
         }
     }

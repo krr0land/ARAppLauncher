@@ -12,27 +12,37 @@ public class RotateLauncher : MonoBehaviour
     [SerializeField]
     InteractionType interaction;
 
-    GameObject Launcher { get { return GetComponent<SpawnLauncher>().Launcher; } }
+    GameObject launcher;
 
     Vector3 prevRightHandPos;
     Vector3 prevLeftHandPos;
-    
+    int pinchTimer;
+
     // Poke rotation
     public OVRSkeleton rightHandSkeleton;
-    private OVRBone indexFingerBone;
+    private OVRBone rightIndexFingerBone;
+    public OVRSkeleton leftHandSkeleton;
+    private OVRBone leftIndexFingerBone;
     private Vector3 lastPosition;
     private Vector3 startPosition;
-	public bool isFingerOutside;
+    public bool isFingerOutside;
     public bool isRotating;
 
     void Start()
     {
+        launcher = GetComponent<SpawnLauncher>().Launcher;
         leftHand = GetComponent<SpawnLauncher>().leftHand;
         rightHand = GetComponent<SpawnLauncher>().rightHand;
 
-        rightHandSkeleton = GameObject.Find("OVRHandRight").GetComponent<OVRSkeleton>();
         OVRSkeleton.BoneId boneId = OVRSkeleton.BoneId.Hand_IndexTip;
-        indexFingerBone = rightHandSkeleton.Bones.ToList().Where(b => b.Id == boneId).ToList().First();
+
+        rightHandSkeleton = GameObject.Find("OVRHandRight").GetComponent<OVRSkeleton>();
+        rightIndexFingerBone = rightHandSkeleton.Bones.ToList().Where(b => b.Id == boneId).ToList().First();
+
+        leftHandSkeleton = GameObject.Find("OVRHandLeft").GetComponent<OVRSkeleton>();
+        leftIndexFingerBone = leftHandSkeleton.Bones.ToList().Where(b => b.Id == boneId).ToList().First();
+
+        pinchTimer = 0;
     }
 
     public void ChangeInteraction(InteractionType interactionType)
@@ -42,76 +52,75 @@ public class RotateLauncher : MonoBehaviour
     }
     void Rotate(Vector3 prevHandPos, Vector3 handPos)
     {
-        var delta = handPos - prevHandPos;
-
-        if (delta.sqrMagnitude > 10e-7f)
-        {
-            float rotationAngle = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
-            rotationAngle = Mathf.Clamp(rotationAngle, -90f, 90f) * 0.02f;
-            Launcher.transform.Rotate(0f, rotationAngle, 0f, Space.World);
-        }
+        var position = launcher.transform.position;
+        var angle = Vector3.SignedAngle(prevHandPos - position, handPos - position, Vector3.up);
+        launcher.transform.Rotate(launcher.transform.up, angle);
     }
 
     void Pinch()
     {
+        pinchTimer++;
         bool isLeftIndexFingerPinching = leftHand.GetFingerIsPinching(OVRHand.HandFinger.Index);
         bool isRightIndexFingerPinching = rightHand.GetFingerIsPinching(OVRHand.HandFinger.Index);
 
         if (!isLeftIndexFingerPinching && isRightIndexFingerPinching)
         {
-            Rotate(prevRightHandPos, rightHand.transform.position);
+            if (pinchTimer < 20) return;
+            if ((prevRightHandPos - rightIndexFingerBone.Transform.position).sqrMagnitude > 10e-7f)
+                Rotate(prevRightHandPos, rightIndexFingerBone.Transform.position);
+            prevRightHandPos = rightIndexFingerBone.Transform.position;
         }
-
-        if (isRightIndexFingerPinching)
-            prevRightHandPos = rightHand.transform.position;
-
-        if (isLeftIndexFingerPinching && !isRightIndexFingerPinching)
+        else if (isLeftIndexFingerPinching && !isRightIndexFingerPinching)
         {
-            Rotate(prevLeftHandPos, leftHand.transform.position);
+            if (pinchTimer < 50) return;
+            if ((prevLeftHandPos - leftIndexFingerBone.Transform.position).sqrMagnitude > 10e-7f)
+                Rotate(prevLeftHandPos, leftIndexFingerBone.Transform.position);
+            prevLeftHandPos = leftIndexFingerBone.Transform.position;
         }
+        else
+        {
+            pinchTimer = 0;
+        }
+    }
 
-        if (isLeftIndexFingerPinching)
-            prevLeftHandPos = leftHand.transform.position;
+    void PokeActive(Vector3 indexFingerPos)
+    {
+        if (isFingerOutside)
+        {
+            var fingerDistance = (indexFingerPos - startPosition).magnitude;
+
+            if (fingerDistance > 0.04f)
+            {
+                isRotating = true;
+            }
+        }
+        else
+        {
+            isFingerOutside = true;
+            startPosition = indexFingerPos;
+        }
+        if (isRotating)
+            Rotate(lastPosition, indexFingerPos);
+        lastPosition = indexFingerPos;
+        isFingerOutside = true;
     }
 
     void Poke()
     {
-        var distance = (indexFingerBone.Transform.position - transform.position).magnitude;
-        Debug.Log("RotateLauncher distance: " + distance + " isFingerOutside: " + isFingerOutside + " isRotating: " + isRotating + " startPosition: " + startPosition + " lastPosition: " + lastPosition);
-        if (IsThresholdReached())
-        {
-            if (isFingerOutside)
-            {
-				var fingerDistance = (indexFingerBone.Transform.position - startPosition).magnitude;
-
-                if (fingerDistance > 0.04f)
-                {
-                    isRotating = true;
-                }
-            }
-            else
-            {
-                isFingerOutside = true;
-                startPosition = indexFingerBone.Transform.position;
-            }
-			if (isRotating) {
-                var position = Launcher.transform.position;
-                var angle = Vector3.SignedAngle(lastPosition-position, indexFingerBone.Transform.position-position, Vector3.up);
-                Launcher.transform.Rotate(Vector3.up, angle);
-			}
-            lastPosition = indexFingerBone.Transform.position;
-            isFingerOutside = true;
-        }
+        if (IsThresholdReached(rightIndexFingerBone.Transform.position))
+            PokeActive(rightIndexFingerBone.Transform.position);
+        else if (IsThresholdReached(leftIndexFingerBone.Transform.position))
+            PokeActive(leftIndexFingerBone.Transform.position);
         else
         {
             isFingerOutside = false;
             isRotating = false;
         }
     }
-    
-    private bool IsThresholdReached()
+
+    private bool IsThresholdReached(Vector3 indexFingerPos)
     {
-        var distance = (indexFingerBone.Transform.position - Launcher.transform.position).magnitude;
+        var distance = (indexFingerPos - launcher.transform.position).magnitude;
         var state = GetComponent<SpawnLauncher>().state;
         if (state == LauncherState.Central)
         {
