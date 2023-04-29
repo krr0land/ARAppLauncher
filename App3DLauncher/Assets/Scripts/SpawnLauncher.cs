@@ -130,12 +130,14 @@ public class SpawnLauncher : MonoBehaviour
         {
             launcher.transform.localPosition = frontalPos;
             launcher.transform.localScale = frontalScale;
+            //launcher.transform.LookAt(centerCamera.transform);
             state = LauncherState.Frontal;
         }
         else if (newState == LauncherState.Central)
         {
             launcher.transform.localPosition = centralPos;
             launcher.transform.localScale = centralScale;
+            launcher.transform.rotation = Quaternion.identity;
             state = LauncherState.Central;
         }
     }

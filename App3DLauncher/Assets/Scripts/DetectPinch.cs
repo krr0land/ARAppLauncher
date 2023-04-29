@@ -7,34 +7,35 @@ public class DetectPinch : MonoBehaviour
     SpawnLauncher spawnLauncher;
     OutlineController outlineController;
 
+    int timer;
 
-    LineRenderer lr;
+    bool previouslyPinched;
+    Vector3 pinchPosition;
+
     // Start is called before the first frame update
     void Start()
     {
         spawnLauncher = transform.parent.parent.GetComponent<SpawnLauncher>();
         outlineController = transform.GetChild(0).GetComponent<OutlineController>();
-
-        lr = spawnLauncher.Launcher.AddComponent<LineRenderer>();
-        lr.startWidth = 0.02f;
-        lr.endWidth = 0.02f;
+        previouslyPinched = false;
+        timer = 0;
     }
 
     void PinchSelect(Vector3 handPos)
     {
+        if (timer > 20)
+        {
+            return;
+        }
         Vector3 headPos = spawnLauncher.centerCamera.transform.position;
         Vector3 direction = handPos - headPos;
-        RaycastHit hit;
         Ray ray = new Ray(headPos, direction);
-        //lr.SetPosition(0, handPos);
-        //lr.SetPosition(1, headPos);
-        if (Physics.Raycast(ray, out hit))
+        foreach (var hit in Physics.RaycastAll(ray))
         {
-            Debug.Log("Hit " + hit.collider.gameObject.name);
             if (hit.collider.gameObject.tag == "App")
             {
-                Debug.Log("Hit");
-                spawnLauncher.SelectApp(transform.gameObject);
+                spawnLauncher.SelectApp(hit.collider.gameObject);
+                break;
             }
         }
     }
@@ -42,6 +43,7 @@ public class DetectPinch : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        timer++;
         if (spawnLauncher.AppSelected)
             return;
 
@@ -60,10 +62,10 @@ public class DetectPinch : MonoBehaviour
                     break;
                 }
             }
-            PinchSelect(pos);
+            pinchPosition = pos;
+            previouslyPinched = true;
         }
-
-        if (isLeftIndexFingerPinching && !isRightIndexFingerPinching)
+        else if (isLeftIndexFingerPinching && !isRightIndexFingerPinching)
         {
             Vector3 pos = spawnLauncher.leftHand.transform.position;
 
@@ -75,7 +77,17 @@ public class DetectPinch : MonoBehaviour
                     break;
                 }
             }
-            PinchSelect(pos);
+            pinchPosition = pos;
+            previouslyPinched = true;
+        }
+        else
+        {
+            if (previouslyPinched)
+            {
+                PinchSelect(pinchPosition);
+                previouslyPinched = false;
+            }
+            timer = 0;
         }
     }
 }
