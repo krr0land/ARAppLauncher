@@ -10,6 +10,8 @@ public class SpawnLauncher : MonoBehaviour
 
     public OVRHand leftHand;
     public OVRHand rightHand;
+    public OVRSkeleton rightSkeleton;
+    public OVRSkeleton leftSkeleton;
 
     public GameObject launcherPrefab;
     public GameObject appPrefab;
