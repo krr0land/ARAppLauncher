@@ -39,10 +39,9 @@ public class SpawnLauncher : MonoBehaviour
 
     public GameObject Launcher { get { return launcher; } }
     public bool AppSelected { get { return selectedObject != null; } }
+    public List<GameObject> Apps { get { return apps; } }
 
-    Vector3 prevHandPos;
-
-    void Start()
+    void Awake()
     {
         prevCamPos = centerCamera.transform.position;
 
@@ -67,8 +66,8 @@ public class SpawnLauncher : MonoBehaviour
 
             apps.Add(app);
         }
-            
-        launcher.GetComponent<SphereArranger>().Arange(apps, appScale);
+
+        launcher.GetComponent<SphereArranger>().Arrange(apps, appScale);
         selectCounter = -1;
     }
 
@@ -112,24 +111,6 @@ public class SpawnLauncher : MonoBehaviour
                     moving = (Vector3.Distance(prevCamPos, centerCamera.transform.position) > 0.1f); // 10 cm
                 }
             }
-
-            //rotation // TODO: left hand doesnt have to be tracked
-            if (!isLeftIndexFingerPinching && isRightIndexFingerPinching)
-            {
-                var delta = rightHand.transform.position - prevHandPos;
-
-                if (delta.sqrMagnitude > 10e-7f)
-                {
-                    float rotationAngle = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
-                    rotationAngle = Mathf.Clamp(rotationAngle, -90f, 90f) * 0.02f;
-                    launcher.transform.Rotate(0f, rotationAngle, 0f, Space.World);
-                }
-
-                prevHandPos = rightHand.transform.position;
-            }
-
-            if(isRightIndexFingerPinching)
-                prevHandPos = rightHand.transform.position;
         }
 
         if (!launcher.activeSelf)

@@ -6,7 +6,7 @@ public class SphereArranger : MonoBehaviour
     List<GameObject> arrangedItems;
     bool aranged = false;
 
-    public void Arange(List<GameObject> items, Vector3 appScale)
+    public void Arrange(List<GameObject> items, Vector3 appScale)
     {
         arrangedItems = items;
 

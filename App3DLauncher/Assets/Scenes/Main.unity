@@ -267,6 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   launcher: {fileID: 972906539}
+  task: 0
 --- !u!23 &151633295
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -539,6 +540,7 @@ GameObject:
   - component: {fileID: 972906540}
   - component: {fileID: 972906541}
   - component: {fileID: 972906542}
+  - component: {fileID: 972906543}
   m_Layer: 0
   m_Name: Launcher
   m_TagString: Untagged
@@ -590,6 +592,20 @@ MonoBehaviour:
   rightHand: {fileID: 1933234922}
   launcherPrefab: {fileID: 5360201197557699604, guid: c0f6e33fc0c25698089f3cb00ae7e86f, type: 3}
   appPrefab: {fileID: 4724721014088108985, guid: cdf8ed6035f449a34bde62695a8157e0, type: 3}
+--- !u!114 &972906543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 972906539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd12bc4238266c4bb50666fee0a803b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftHand: {fileID: 209568346}
+  rightHand: {fileID: 1933234922}
 --- !u!20 &1735687002 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 2037080, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
