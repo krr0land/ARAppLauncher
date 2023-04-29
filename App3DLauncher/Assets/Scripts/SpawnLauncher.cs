@@ -7,6 +7,7 @@ public class SpawnLauncher : MonoBehaviour
 {
     public Camera centerCamera;
     Vector3 prevCamPos;
+    public InstructionScript instructionScript;
 
     public OVRHand leftHand;
     public OVRHand rightHand;
@@ -159,7 +160,9 @@ public class SpawnLauncher : MonoBehaviour
         selectedObject = obj;
         selectedObject.GetComponent<Renderer>().material.EnableKeyword("_EMISSION");
         selectCounter = 50;
+        
         Debug.Log("Selected: " + obj.name);
+        instructionScript.OnAppSelected(obj.name);
     }
 
     private void OnDestroy()

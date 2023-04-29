@@ -4,13 +4,19 @@ using UnityEngine;
 
 public class SelectInLauncher : MonoBehaviour
 {
-    enum InteractionType { Pinch, Poke }
+    public enum InteractionType { Pinch, Poke }
 
     [SerializeField]
     InteractionType interaction;
     // Start is called before the first frame update
     void Start()
     {
+        ChangeInteraction(interaction);
+    }
+
+    public void ChangeInteraction(InteractionType interaction)
+    {
+        this.interaction = interaction;
         List<GameObject> apps = GetComponent<SpawnLauncher>().Apps;
         switch (interaction)
         {
@@ -36,7 +42,7 @@ public class SelectInLauncher : MonoBehaviour
                 }
                 break;
         }
-    }
+    } 
 
     // Update is called once per frame
     void Update()

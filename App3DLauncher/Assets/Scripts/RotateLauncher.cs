@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class RotateLauncher : MonoBehaviour
 {
-    enum InteractionType { Pinch, Poke }
+    public enum InteractionType { Pinch, Poke }
     OVRHand leftHand;
     OVRHand rightHand;
 
@@ -35,6 +35,11 @@ public class RotateLauncher : MonoBehaviour
         indexFingerBone = rightHandSkeleton.Bones.ToList().Where(b => b.Id == boneId).ToList().First();
     }
 
+    public void ChangeInteraction(InteractionType interactionType)
+    {
+        interaction = interactionType;
+        
+    }
     void Rotate(Vector3 prevHandPos, Vector3 handPos)
     {
         var delta = handPos - prevHandPos;
