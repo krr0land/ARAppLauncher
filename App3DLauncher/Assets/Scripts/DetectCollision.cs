@@ -3,6 +3,7 @@ using UnityEngine;
 public class DetectCollision : MonoBehaviour
 {
     SpawnLauncher spawnLauncher;
+	RotateLauncher rotateLauncher;
     
     private bool isColliding = false;
     private Vector3 enterPos;
@@ -10,12 +11,15 @@ public class DetectCollision : MonoBehaviour
     void Start()
     {
         spawnLauncher = transform.parent.parent.GetComponent<SpawnLauncher>();
+		rotateLauncher = transform.parent.parent.GetComponent<RotateLauncher>();
     }
 
     void OnTriggerEnter(Collider col)
     {
         if (spawnLauncher.AppSelected)
             return;
+		if (rotateLauncher.isRotating)
+			return;
 
         if (col.name.StartsWith("Hand_Index3")) // possible values are in the OVRSkeleton.BoneId enum
         {
@@ -34,7 +38,7 @@ public class DetectCollision : MonoBehaviour
         if (col.name.StartsWith("Hand_Index3")) // possible values are in the OVRSkeleton.BoneId enum
         {
             Vector3 exitPos = col.ClosestPoint(transform.position);
-            if (Vector3.Distance(enterPos, exitPos) < 0.02f)
+            if (!rotateLauncher.isRotating)
             {
                 spawnLauncher.SelectApp(transform.gameObject);
             }

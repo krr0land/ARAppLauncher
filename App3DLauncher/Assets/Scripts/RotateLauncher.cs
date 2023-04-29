@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -15,12 +16,24 @@ public class RotateLauncher : MonoBehaviour
 
     Vector3 prevRightHandPos;
     Vector3 prevLeftHandPos;
+    
+    // Poke rotation
+    public OVRSkeleton rightHandSkeleton;
+    private OVRBone indexFingerBone;
+    private Vector3 lastPosition;
+    private Vector3 startPosition;
+	private bool isFingerOutside;
+    public bool isRotating;
 
     void Start()
     {
         launcher = GetComponent<SpawnLauncher>().Launcher;
         leftHand = GetComponent<SpawnLauncher>().leftHand;
         rightHand = GetComponent<SpawnLauncher>().rightHand;
+
+        rightHandSkeleton = GameObject.Find("OVRHandRight").GetComponent<OVRSkeleton>();
+        OVRSkeleton.BoneId boneId = OVRSkeleton.BoneId.Hand_IndexTip;
+        indexFingerBone = rightHandSkeleton.Bones.ToList().Where(b => b.Id == boneId).ToList().First();
     }
 
     void PinchRotate(Vector3 prevHandPos, Vector3 handPos)
@@ -57,7 +70,39 @@ public class RotateLauncher : MonoBehaviour
             prevLeftHandPos = leftHand.transform.position;
     }
 
-    void Poke() { }
+    void Poke()
+    {
+        var distance = (indexFingerBone.Transform.position - transform.position).magnitude;
+        Debug.Log("RotateLauncher distance: " + distance + " isFingerOutside: " + isFingerOutside + " isRotating: " + isRotating + " startPosition: " + startPosition + " lastPosition: " + lastPosition);
+        if (distance > 0.55f)
+        {
+            if (isFingerOutside)
+            {
+				var fingerDistance = (indexFingerBone.Transform.position - startPosition).magnitude;
+
+                if (fingerDistance > 0.04f)
+                {
+                    isRotating = true;
+                }
+            }
+            else
+            {
+                isFingerOutside = true;
+                startPosition = indexFingerBone.Transform.position;
+            }
+			if (isRotating) {
+                var angle = Vector3.SignedAngle(lastPosition, indexFingerBone.Transform.position, Vector3.up);
+                launcher.transform.Rotate(Vector3.up, angle);
+			}
+            lastPosition = indexFingerBone.Transform.position;
+            isFingerOutside = true;
+        }
+        else
+        {
+            isFingerOutside = false;
+            isRotating = false;
+        }
+    }
 
     void Update()
     {
