@@ -16,15 +16,24 @@ public class SelectInLauncher : MonoBehaviour
         {
             case InteractionType.Pinch:
                 foreach (GameObject app in apps)
-                    app.GetComponent<DetectCollision>().enabled = true;
+                {
+                    app.GetComponent<DetectCollision>().enabled = false;
+                    app.GetComponent<DetectPinch>().enabled = true;
+                }
                 break;
             case InteractionType.Poke:
                 foreach (GameObject app in apps)
-                    app.GetComponent<DetectCollision>().enabled = false;
+                {
+                    app.GetComponent<DetectCollision>().enabled = true;
+                    app.GetComponent<DetectPinch>().enabled = false;
+                }
                 break;
             default:
                 foreach (GameObject app in apps)
+                {
                     app.GetComponent<DetectCollision>().enabled = false;
+                    app.GetComponent<DetectPinch>().enabled = false;
+                }
                 break;
         }
     }
