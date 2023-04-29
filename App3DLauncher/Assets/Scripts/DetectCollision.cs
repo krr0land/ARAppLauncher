@@ -25,6 +25,7 @@ public class DetectCollision : MonoBehaviour
         {
             enterPos = col.ClosestPoint(transform.position);
             isColliding = true;
+            transform.GetChild(0).GetComponent<OutlineController>().OpenOutline();   
         }
     }
     
@@ -38,7 +39,7 @@ public class DetectCollision : MonoBehaviour
         if (col.name.StartsWith("Hand_Index3")) // possible values are in the OVRSkeleton.BoneId enum
         {
             Vector3 exitPos = col.ClosestPoint(transform.position);
-            if (!rotateLauncher.isRotating)
+            if (!rotateLauncher.isRotating && Vector3.Distance(enterPos, exitPos) < 0.02f)
             {
                 spawnLauncher.SelectApp(transform.gameObject);
             }

@@ -12,7 +12,7 @@ public class RotateLauncher : MonoBehaviour
     [SerializeField]
     InteractionType interaction;
 
-    GameObject launcher;
+    GameObject Launcher { get { return GetComponent<SpawnLauncher>().Launcher; } }
 
     Vector3 prevRightHandPos;
     Vector3 prevLeftHandPos;
@@ -22,12 +22,11 @@ public class RotateLauncher : MonoBehaviour
     private OVRBone indexFingerBone;
     private Vector3 lastPosition;
     private Vector3 startPosition;
-	private bool isFingerOutside;
+	public bool isFingerOutside;
     public bool isRotating;
 
     void Start()
     {
-        launcher = GetComponent<SpawnLauncher>().Launcher;
         leftHand = GetComponent<SpawnLauncher>().leftHand;
         rightHand = GetComponent<SpawnLauncher>().rightHand;
 
@@ -36,7 +35,7 @@ public class RotateLauncher : MonoBehaviour
         indexFingerBone = rightHandSkeleton.Bones.ToList().Where(b => b.Id == boneId).ToList().First();
     }
 
-    void PinchRotate(Vector3 prevHandPos, Vector3 handPos)
+    void Rotate(Vector3 prevHandPos, Vector3 handPos)
     {
         var delta = handPos - prevHandPos;
 
@@ -44,7 +43,7 @@ public class RotateLauncher : MonoBehaviour
         {
             float rotationAngle = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
             rotationAngle = Mathf.Clamp(rotationAngle, -90f, 90f) * 0.02f;
-            launcher.transform.Rotate(0f, rotationAngle, 0f, Space.World);
+            Launcher.transform.Rotate(0f, rotationAngle, 0f, Space.World);
         }
     }
 
@@ -55,7 +54,7 @@ public class RotateLauncher : MonoBehaviour
 
         if (!isLeftIndexFingerPinching && isRightIndexFingerPinching)
         {
-            PinchRotate(prevRightHandPos, rightHand.transform.position);
+            Rotate(prevRightHandPos, rightHand.transform.position);
         }
 
         if (isRightIndexFingerPinching)
@@ -63,7 +62,7 @@ public class RotateLauncher : MonoBehaviour
 
         if (isLeftIndexFingerPinching && !isRightIndexFingerPinching)
         {
-            PinchRotate(prevLeftHandPos, leftHand.transform.position);
+            Rotate(prevLeftHandPos, leftHand.transform.position);
         }
 
         if (isLeftIndexFingerPinching)
@@ -74,7 +73,7 @@ public class RotateLauncher : MonoBehaviour
     {
         var distance = (indexFingerBone.Transform.position - transform.position).magnitude;
         Debug.Log("RotateLauncher distance: " + distance + " isFingerOutside: " + isFingerOutside + " isRotating: " + isRotating + " startPosition: " + startPosition + " lastPosition: " + lastPosition);
-        if (distance > 0.55f)
+        if (IsThresholdReached())
         {
             if (isFingerOutside)
             {
@@ -91,8 +90,9 @@ public class RotateLauncher : MonoBehaviour
                 startPosition = indexFingerBone.Transform.position;
             }
 			if (isRotating) {
-                var angle = Vector3.SignedAngle(lastPosition, indexFingerBone.Transform.position, Vector3.up);
-                launcher.transform.Rotate(Vector3.up, angle);
+                var position = Launcher.transform.position;
+                var angle = Vector3.SignedAngle(lastPosition-position, indexFingerBone.Transform.position-position, Vector3.up);
+                Launcher.transform.Rotate(Vector3.up, angle);
 			}
             lastPosition = indexFingerBone.Transform.position;
             isFingerOutside = true;
@@ -102,6 +102,17 @@ public class RotateLauncher : MonoBehaviour
             isFingerOutside = false;
             isRotating = false;
         }
+    }
+    
+    private bool IsThresholdReached()
+    {
+        var distance = (indexFingerBone.Transform.position - Launcher.transform.position).magnitude;
+        var state = GetComponent<SpawnLauncher>().state;
+        if (state == LauncherState.Central)
+        {
+            return distance > 0.449f;
+        }
+        return distance < 0.2f;
     }
 
     void Update()

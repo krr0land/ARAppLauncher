@@ -16,7 +16,7 @@ public class SpawnLauncher : MonoBehaviour
 
     GameObject launcher;
     List<GameObject> apps;
-    LauncherState state = LauncherState.Frontal;
+    public LauncherState state = LauncherState.Frontal;
 
     readonly Vector3 appScale = new Vector3(0.1f, 0.1f, 0.1f);
 
@@ -26,7 +26,7 @@ public class SpawnLauncher : MonoBehaviour
     Vector3 frontalPos;
 
     readonly Vector3 centralPos = new Vector3(0f, 0f, 0f);
-    readonly Vector3 centralScale = new Vector3(1.2f, 1.2f, 1.2f);
+    readonly Vector3 centralScale = new Vector3(1f, 1f, 1f);
 
     readonly Color emissionColor = new Color(0.5f, 0.5f, 0.5f);
 
