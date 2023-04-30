@@ -40,10 +40,14 @@ public class DetectPinch : MonoBehaviour
         }
     }
 
+    private void FixedUpdate()
+    {
+        timer++;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        timer++;
         if (spawnLauncher.AppSelected)
             return;
 

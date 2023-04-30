@@ -6,7 +6,6 @@ public enum LauncherState { Frontal, Central }
 public class SpawnLauncher : MonoBehaviour
 {
     public Camera centerCamera;
-    Vector3 prevCamPos;
     public InstructionScript instructionScript;
 
     public OVRHand leftHand;
@@ -33,8 +32,6 @@ public class SpawnLauncher : MonoBehaviour
 
     readonly Color emissionColor = new Color(0.5f, 0.5f, 0.5f);
 
-    bool moving = true;
-    int moveCounter = 0;
     int spawnCounter = 0;
 
     int selectCounter = 0;
@@ -46,11 +43,9 @@ public class SpawnLauncher : MonoBehaviour
 
     void Awake()
     {
-        prevCamPos = centerCamera.transform.position;
 
         launcher = Instantiate(launcherPrefab, Vector3.zero, Quaternion.identity, transform);
         Toggle();
-        SetState(LauncherState.Frontal);
 
         apps = new List<GameObject>();
         foreach (AppInfo info in AppCatalog.catalog)
@@ -72,25 +67,24 @@ public class SpawnLauncher : MonoBehaviour
 
         launcher.GetComponent<SphereArranger>().Arrange(apps, appScale);
         selectCounter = -1;
+        SetState(state);
     }
 
     private void FixedUpdate()
     {
+        if (spawnCounter == 1)
+        {
+            GetComponent<RotateLauncher>().enabled = true;
+            GetComponent<SelectInLauncher>().Enable();
+        }
         if (spawnCounter > 0)
             --spawnCounter;
-        if (moveCounter > 0)
-            --moveCounter;
         if (selectCounter > 0)
             --selectCounter;
     }
 
     void Update()
     {
-        if (moveCounter == 0)
-        {
-            prevCamPos = centerCamera.transform.position;
-            moveCounter = 50; // 1 sec
-        }
 
         if (selectCounter == 0)
         {
@@ -110,28 +104,22 @@ public class SpawnLauncher : MonoBehaviour
                 if (spawnCounter == 0)
                 {
                     spawnCounter = 50; // 1 sec
+                    GetComponent<RotateLauncher>().enabled = false;
+                    GetComponent<SelectInLauncher>().Disable();
                     Toggle();
-                    moving = (Vector3.Distance(prevCamPos, centerCamera.transform.position) > 0.1f); // 10 cm
+                    SetState(state);
                 }
             }
         }
-
-        if (!launcher.activeSelf)
-            return;
-
-        if (moving && state == LauncherState.Central)
-            SetState(LauncherState.Frontal);
-        else if (!moving && state == LauncherState.Frontal)
-            SetState(LauncherState.Central);
     }
 
-    void SetState(LauncherState newState)
+    public void SetState(LauncherState newState)
     {
         if (newState == LauncherState.Frontal)
         {
             launcher.transform.localPosition = frontalPos;
             launcher.transform.localScale = frontalScale;
-            //launcher.transform.LookAt(centerCamera.transform);
+            launcher.transform.LookAt(centerCamera.transform);
             state = LauncherState.Frontal;
         }
         else if (newState == LauncherState.Central)
@@ -164,9 +152,16 @@ public class SpawnLauncher : MonoBehaviour
         selectedObject = obj;
         selectedObject.GetComponent<Renderer>().material.EnableKeyword("_EMISSION");
         selectCounter = 50;
-        
+
         Debug.Log("Selected: " + obj.name);
-        instructionScript.OnAppSelected(obj.name);
+        try // needs rework, this is a quick fix
+        {
+            instructionScript.OnAppSelected(obj.name);
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log(e);
+        }
     }
 
     private void OnDestroy()

@@ -3,12 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Threading.Tasks;
 
-struct Task
+struct Instruction
 {
     public enum InteractionType { Pinch, Poke }
     public enum MovementType { Still, Walking }
-    
+
     public string appName;
     public InteractionType interaction;
     public MovementType movement;
@@ -18,96 +19,94 @@ public class InstructionScript : MonoBehaviour
 {
     [SerializeField]
     GameObject launcher;
-    
+
     public SelectInLauncher selectInLauncher;
     public RotateLauncher rotateLauncher;
 
-    Task task => instructions[taskId];
     private bool finished = false;
     TextMeshPro text;
 
-    private List<Task> instructions1 = new List<Task>
-    {
-        new Task
+    private List<List<Instruction>> instructions = new List<List<Instruction>>
+    {new List<Instruction>{
+        new Instruction
         {
-            appName = "YouTube", interaction = Task.InteractionType.Poke, movement = Task.MovementType.Still
+            appName = "YouTube", interaction = Instruction.InteractionType.Poke, movement = Instruction.MovementType.Still
         },
-        new Task
+        new Instruction
         {
-            appName = "Spotify", interaction = Task.InteractionType.Poke, movement = Task.MovementType.Still
+            appName = "Spotify", interaction = Instruction.InteractionType.Poke, movement = Instruction.MovementType.Walking
         },
-        new Task
+        new Instruction
         {
-            appName = "Hulu", interaction = Task.InteractionType.Pinch, movement = Task.MovementType.Walking
+            appName = "Hulu", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Still
         },
-        new Task
+        new Instruction
         {
-            appName = "Chrome", interaction = Task.InteractionType.Pinch, movement = Task.MovementType.Walking
+            appName = "Google chrome", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Walking
         }
-    };
-
-    private List<Task> instructions2 = new List<Task>
-    {
-        new Task
+    },
+    new List<Instruction>{
+        new Instruction
         {
-            appName = "Youtube2", interaction = Task.InteractionType.Pinch, movement = Task.MovementType.Still
+            appName = "Youtube", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Walking
         },
-        new Task
+        new Instruction
         {
-            appName = "Spotify2", interaction = Task.InteractionType.Pinch, movement = Task.MovementType.Still
+            appName = "Spotify", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Still
         },
-        new Task
+        new Instruction
         {
-            appName = "Hulu2", interaction = Task.InteractionType.Pinch, movement = Task.MovementType.Walking
+            appName = "Hulu", interaction = Instruction.InteractionType.Poke, movement = Instruction.MovementType.Walking
         },
-        new Task
+        new Instruction
         {
-            appName = "Chrome2", interaction = Task.InteractionType.Pinch, movement = Task.MovementType.Walking
+            appName = "Google chrome", interaction = Instruction.InteractionType.Poke, movement = Instruction.MovementType.Still
         }
-    };
-    
-    List<Task> instructions;
+    }};
 
-    [SerializeField]
+    int instructionNum;
+
     int taskId = 0;
     // Start is called before the first frame update
     void Start()
     {
-        instructions = instructions1;
+        instructionNum = 1;
         text = GetComponent<TextMeshPro>();
         text.text = "Task not selected";
+        taskId = -1;
+        NextTask();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (OVRInput.GetDown(OVRInput.RawButton.A))
+        if (OVRInput.GetDown(OVRInput.RawButton.A) &&
+            !OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Hands))
         {
-            if (instructions == instructions1)
-            {
-                instructions = instructions2;
-            }
-            if (instructions == instructions2)
-            {
-                instructions = instructions1;
-            }
-
-            taskId = 0;
-        }
-        
-        if(Input.GetKeyDown(KeyCode.Space) || OVRInput.GetDown(OVRInput.RawButton.B))
-        {
+            Debug.Log("A pressed");
+            instructionNum = (instructionNum + 1) % instructions.Count;
+            finished = false;
+            taskId = -1;
             NextTask();
         }
-        
+
+        if (OVRInput.GetDown(OVRInput.RawButton.B) &&
+            !OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Hands))
+        {
+            Debug.Log("B pressed");
+            NextTask();
+        }
+
         if (finished)
         {
             text.text = $"You finished all interactions!";
             return;
         }
-        
+
+        var task = instructions[instructionNum][taskId];
+
         string movementText;
-        if (task.movement == Task.MovementType.Walking)
+        if (task.movement != Instruction.MovementType.Walking)
         {
             movementText = "Stand still";
         }
@@ -115,12 +114,12 @@ public class InstructionScript : MonoBehaviour
         {
             movementText = "Open the launcher when walking";
         }
-        
+
         if (launcher.activeSelf)
         {
-            if (task.interaction == Task.InteractionType.Pinch)
+            if (task.interaction == Instruction.InteractionType.Pinch)
             {
-                text.text = $"{movementText}\nSelect an app by pinching: {task.appName}";    
+                text.text = $"{movementText}\nSelect an app by pinching: {task.appName}";
             }
             else
             {
@@ -133,12 +132,13 @@ public class InstructionScript : MonoBehaviour
         }
     }
 
-    void NextTask()
+    async void NextTask()
     {
-        if(taskId < instructions.Count - 1)
+        await Task.Delay(1000);
+        if (taskId < instructions[instructionNum].Count - 1)
         {
             taskId++;
-            if (task.interaction == Task.InteractionType.Pinch)
+            if (instructions[instructionNum][taskId].interaction == Instruction.InteractionType.Pinch)
             {
                 selectInLauncher.ChangeInteraction(SelectInLauncher.InteractionType.Pinch);
                 rotateLauncher.ChangeInteraction(RotateLauncher.InteractionType.Pinch);
@@ -147,6 +147,14 @@ public class InstructionScript : MonoBehaviour
             {
                 selectInLauncher.ChangeInteraction(SelectInLauncher.InteractionType.Poke);
                 rotateLauncher.ChangeInteraction(RotateLauncher.InteractionType.Poke);
+            }
+            if (instructions[instructionNum][taskId].movement != Instruction.MovementType.Walking)
+            {
+                launcher.GetComponent<SpawnLauncher>().SetState(LauncherState.Central);
+            }
+            else
+            {
+                launcher.GetComponent<SpawnLauncher>().SetState(LauncherState.Frontal);
             }
         }
         else
@@ -157,7 +165,7 @@ public class InstructionScript : MonoBehaviour
 
     public void OnAppSelected(string objName)
     {
-        if (String.Equals(objName, task.appName, StringComparison.OrdinalIgnoreCase))
+        if (String.Equals(objName, instructions[instructionNum][taskId].appName, StringComparison.OrdinalIgnoreCase))
         {
             NextTask();
         }

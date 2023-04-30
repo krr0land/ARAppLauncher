@@ -3,34 +3,36 @@ using UnityEngine;
 public class DetectCollision : MonoBehaviour
 {
     SpawnLauncher spawnLauncher;
-	RotateLauncher rotateLauncher;
-    
+    RotateLauncher rotateLauncher;
+
     private bool isColliding = false;
     private Vector3 enterPos;
 
     void Start()
     {
         spawnLauncher = transform.parent.parent.GetComponent<SpawnLauncher>();
-		rotateLauncher = transform.parent.parent.GetComponent<RotateLauncher>();
+        rotateLauncher = transform.parent.parent.GetComponent<RotateLauncher>();
     }
 
     void OnTriggerEnter(Collider col)
     {
+        if (!enabled) return;
         if (spawnLauncher.AppSelected)
             return;
-		if (rotateLauncher.isRotating)
-			return;
+        if (rotateLauncher.isRotating)
+            return;
 
         if (col.name.StartsWith("Hand_Index3")) // possible values are in the OVRSkeleton.BoneId enum
         {
             enterPos = col.ClosestPoint(transform.position);
             isColliding = true;
-            transform.GetChild(0).GetComponent<OutlineController>().OpenOutline();   
+            transform.GetChild(0).GetComponent<OutlineController>().OpenOutline();
         }
     }
-    
-    void OnTriggerExit(Collider col) 
+
+    void OnTriggerExit(Collider col)
     {
+        if (!enabled) return;
         if (!isColliding)
             return;
         if (spawnLauncher.AppSelected)
@@ -47,7 +49,7 @@ public class DetectCollision : MonoBehaviour
             {
                 isColliding = false;
             }
-            transform.GetChild(0).GetComponent<OutlineController>().CloseOutline();   
+            transform.GetChild(0).GetComponent<OutlineController>().CloseOutline();
         }
     }
 }

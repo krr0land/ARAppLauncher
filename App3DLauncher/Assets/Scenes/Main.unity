@@ -248,12 +248,12 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0.48126602}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  _SortingLayer: 0
-  _SortingLayerID: 0
-  _SortingOrder: 0
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 151633295}
   m_maskType: 0
+  _SortingLayer: 0
+  _SortingLayerID: 0
+  _SortingOrder: 0
 --- !u!114 &151633294
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,7 +269,6 @@ MonoBehaviour:
   launcher: {fileID: 972906539}
   selectInLauncher: {fileID: 972906544}
   rotateLauncher: {fileID: 972906543}
-  taskId: 0
 --- !u!23 &151633295
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -591,7 +590,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   centerCamera: {fileID: 1735687002}
-  instructionScript: {fileID: 0}
+  instructionScript: {fileID: 151633294}
   leftHand: {fileID: 209568346}
   rightHand: {fileID: 1933234922}
   rightSkeleton: {fileID: 1933234928}
@@ -611,9 +610,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dd12bc4238266c4bb50666fee0a803b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interaction: 0
-  rightHandSkeleton: {fileID: 0}
-  leftHandSkeleton: {fileID: 0}
+  interaction: 1
   isFingerOutside: 0
   isRotating: 0
 --- !u!114 &972906544
@@ -628,7 +625,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c176a6c99dc0824cebd554bec1776f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interaction: 0
+  interaction: 1
 --- !u!114 &1576045302 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 114567484643301796, guid: 835e735ca71bf78459fb2cababd74112, type: 3}

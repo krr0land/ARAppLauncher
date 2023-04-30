@@ -19,13 +19,15 @@ public class RotateLauncher : MonoBehaviour
     int pinchTimer;
 
     // Poke rotation
-    public OVRSkeleton rightHandSkeleton;
-    private OVRBone rightIndexFingerBone;
-    public OVRSkeleton leftHandSkeleton;
-    private OVRBone leftIndexFingerBone;
-    private Vector3 lastPosition;
-    private Vector3 startPosition;
+    OVRSkeleton rightHandSkeleton;
+    OVRBone rightIndexFingerBone;
+    OVRSkeleton leftHandSkeleton;
+    OVRBone leftIndexFingerBone;
+    Vector3 lastPosition;
+    Vector3 startPosition;
+    [HideInInspector]
     public bool isFingerOutside;
+    [HideInInspector]
     public bool isRotating;
 
     void Start()
@@ -48,18 +50,17 @@ public class RotateLauncher : MonoBehaviour
     public void ChangeInteraction(InteractionType interactionType)
     {
         interaction = interactionType;
-        
+
     }
     void Rotate(Vector3 prevHandPos, Vector3 handPos)
     {
         var position = launcher.transform.position;
         var angle = Vector3.SignedAngle(prevHandPos - position, handPos - position, Vector3.up);
-        launcher.transform.Rotate(launcher.transform.up, angle);
+        launcher.transform.Rotate(Vector3.up, angle);
     }
 
     void Pinch()
     {
-        pinchTimer++;
         bool isLeftIndexFingerPinching = leftHand.GetFingerIsPinching(OVRHand.HandFinger.Index);
         bool isRightIndexFingerPinching = rightHand.GetFingerIsPinching(OVRHand.HandFinger.Index);
 
@@ -72,7 +73,7 @@ public class RotateLauncher : MonoBehaviour
         }
         else if (isLeftIndexFingerPinching && !isRightIndexFingerPinching)
         {
-            if (pinchTimer < 50) return;
+            if (pinchTimer < 20) return;
             if ((prevLeftHandPos - leftIndexFingerBone.Transform.position).sqrMagnitude > 10e-7f)
                 Rotate(prevLeftHandPos, leftIndexFingerBone.Transform.position);
             prevLeftHandPos = leftIndexFingerBone.Transform.position;
@@ -124,9 +125,14 @@ public class RotateLauncher : MonoBehaviour
         var state = GetComponent<SpawnLauncher>().state;
         if (state == LauncherState.Central)
         {
-            return distance > 0.449f;
+            return distance > 0.449f && distance < 0.460f;
         }
         return distance < 0.2f;
+    }
+
+    private void FixedUpdate()
+    {
+        pinchTimer++;
     }
 
     void Update()

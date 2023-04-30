@@ -42,7 +42,22 @@ public class SelectInLauncher : MonoBehaviour
                 }
                 break;
         }
-    } 
+    }
+
+    public void Disable()
+    {
+        List<GameObject> apps = GetComponent<SpawnLauncher>().Apps;
+        foreach (GameObject app in apps)
+        {
+            app.GetComponent<DetectCollision>().enabled = false;
+            app.GetComponent<DetectPinch>().enabled = false;
+        }
+    }
+
+    public void Enable()
+    {
+        ChangeInteraction(interaction);
+    }
 
     // Update is called once per frame
     void Update()
