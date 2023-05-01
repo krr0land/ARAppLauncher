@@ -34,25 +34,7 @@ public class InstructionScript : MonoBehaviour
         },
         new Instruction
         {
-            appName = "Spotify", interaction = Instruction.InteractionType.Poke, movement = Instruction.MovementType.Walking
-        },
-        new Instruction
-        {
-            appName = "Hulu", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Still
-        },
-        new Instruction
-        {
-            appName = "Google chrome", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Walking
-        }
-    },
-    new List<Instruction>{
-        new Instruction
-        {
-            appName = "Youtube", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Walking
-        },
-        new Instruction
-        {
-            appName = "Spotify", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Still
+            appName = "Spotify", interaction = Instruction.InteractionType.Poke, movement = Instruction.MovementType.Still
         },
         new Instruction
         {
@@ -60,7 +42,25 @@ public class InstructionScript : MonoBehaviour
         },
         new Instruction
         {
-            appName = "Google chrome", interaction = Instruction.InteractionType.Poke, movement = Instruction.MovementType.Still
+            appName = "Google chrome", interaction = Instruction.InteractionType.Poke, movement = Instruction.MovementType.Walking
+        }
+    },
+    new List<Instruction>{
+        new Instruction
+        {
+            appName = "Pinterest", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Still
+        },
+        new Instruction
+        {
+            appName = "Reddit", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Still
+        },
+        new Instruction
+        {
+            appName = "TikTok", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Walking
+        },
+        new Instruction
+        {
+            appName = "VLC", interaction = Instruction.InteractionType.Pinch, movement = Instruction.MovementType.Walking
         }
     }};
 
@@ -80,8 +80,11 @@ public class InstructionScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        var controller = OVRInput.GetActiveController();
         if (OVRInput.GetDown(OVRInput.RawButton.A) &&
-            !OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Hands))
+            controller != OVRInput.Controller.Hands &&
+            controller != OVRInput.Controller.LHand &&
+            controller != OVRInput.Controller.RHand)
         {
             Debug.Log("A pressed");
             instructionNum = (instructionNum + 1) % instructions.Count;
@@ -91,7 +94,9 @@ public class InstructionScript : MonoBehaviour
         }
 
         if (OVRInput.GetDown(OVRInput.RawButton.B) &&
-            !OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Hands))
+            controller != OVRInput.Controller.Hands &&
+            controller != OVRInput.Controller.LHand &&
+            controller != OVRInput.Controller.RHand)
         {
             Debug.Log("B pressed");
             NextTask();

@@ -66,14 +66,14 @@ public class RotateLauncher : MonoBehaviour
 
         if (!isLeftIndexFingerPinching && isRightIndexFingerPinching)
         {
-            if (pinchTimer < 20) return;
+            if (pinchTimer < 20) { prevRightHandPos = rightIndexFingerBone.Transform.position; return; }
             if ((prevRightHandPos - rightIndexFingerBone.Transform.position).sqrMagnitude > 10e-7f)
                 Rotate(prevRightHandPos, rightIndexFingerBone.Transform.position);
             prevRightHandPos = rightIndexFingerBone.Transform.position;
         }
         else if (isLeftIndexFingerPinching && !isRightIndexFingerPinching)
         {
-            if (pinchTimer < 20) return;
+            if (pinchTimer < 20) { prevRightHandPos = rightIndexFingerBone.Transform.position; return; }
             if ((prevLeftHandPos - leftIndexFingerBone.Transform.position).sqrMagnitude > 10e-7f)
                 Rotate(prevLeftHandPos, leftIndexFingerBone.Transform.position);
             prevLeftHandPos = leftIndexFingerBone.Transform.position;
@@ -81,6 +81,7 @@ public class RotateLauncher : MonoBehaviour
         else
         {
             pinchTimer = 0;
+            prevRightHandPos = rightIndexFingerBone.Transform.position;
         }
     }
 
@@ -125,7 +126,7 @@ public class RotateLauncher : MonoBehaviour
         var state = GetComponent<SpawnLauncher>().state;
         if (state == LauncherState.Central)
         {
-            return distance > 0.449f && distance < 0.460f;
+            return distance > 0.449f;
         }
         return distance < 0.2f;
     }
